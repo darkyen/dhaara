@@ -1,6 +1,6 @@
 {
   "name": "dhaara",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "A simple safe streams module for Socket.io",
   "main": "lib/index.js",
   "scripts": {
