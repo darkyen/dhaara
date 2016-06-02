@@ -4,7 +4,7 @@ Node.js style duplex stream over the top of socket.io!
 
 # Installation
 ```bash
-npm install --save darkyen/dhaara
+npm install --save dhaara
 ```
 
 #Usage
@@ -18,7 +18,7 @@ const stream = new Dhaara({
   name: 'yourAwesomeStreamName',
 });
 
-// at this point this is a duplex stream so 
+// at this point this is a duplex stream so
 // do whatever you want
 ```
 
@@ -33,7 +33,7 @@ To create a simple unix style echo with socket.io you can do
       name: 'echo',
       socket,
     });
-    
+
     stream.pipe(stream);
   });
 ```
