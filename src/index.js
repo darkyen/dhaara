@@ -25,7 +25,7 @@ class StreamIO extends Duplex{
     super(opts);
     this.opts = Object.freeze(Object.assign({}, StreamIO.defaults, opts));
     this._readable = true;
-    this._writable = true;
+    this._writeable = true;
 
     const {socket, name} = opts;
     const eventNames = {
@@ -93,17 +93,17 @@ class StreamIO extends Duplex{
     this._send('end', data || null);
     log(`Stream[${name}] recieved end from source`);
 
-    if(opts.allowHalfOpen === false){
+    if(opts.allowHalfOpen === false || this._readable === false){
       log(`Stream[${name}] should not be half-open, closing now!`);
-      this.close();
+      return this.close();
     }
 
-    this._writable = false;
+    this._writeable = false;
   }
 
   // Occurs when remote End emits FIN
   _handleRemoteEnd({payload}){
-    const {opts} = this;
+    const {opts, name} = this;
     this.push(payload);
     if(payload){
       // Properly finish.
@@ -112,8 +112,9 @@ class StreamIO extends Duplex{
 
     this.emit('end', payload);
 
-    if(opts.allowHalfOpen === false){
-      this.close();
+    if(opts.allowHalfOpen === false || this._writeable === false){
+      log(`Stream[${name}] should not be half-open, closing now!`);
+      return this.close();
     }
 
     this._readable = false;
@@ -139,19 +140,25 @@ class StreamIO extends Duplex{
   }
 
   _write(buffer, encoding, done){
+    if(this._writeable === false){
+      throw new Error('Cannot write to a stream that is not writable anymore');
+    }
     log(`Stream[${this.name}] writing ${buffer.length} bytes`);
     this._send('data', buffer, done);
   }
 
   _read(n){
     /* Does nothing, we write at our own pace */
+    if(this._readable == false){
+      throw new Error('Cannot read from a stream not readable');
+    }
   }
 
   close(){
     // this.emit('end');
-    this._readable = this._writable = false;
-    this.emit('close');
+    this._readable = this._writeable = false;
     this.destroy();
+    this.emit('close');
   }
 
   destroy(){
